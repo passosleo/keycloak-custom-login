@@ -21,6 +21,7 @@ const Login = ({navigation}) => {
     password: '',
   });
   const [tokens, setTokens] = useState({});
+  const [isTokenReady, setTokenReady] = useState(false);
 
   const signIn = async () => {
     const data = {
@@ -40,13 +41,21 @@ const Login = ({navigation}) => {
 
     const response = await axios(config);
 
+    setTokenReady(true);
+
     setTokens({
       accessToken: response.data.access_token,
       refreshToken: response.data.refresh_token,
     });
-
-    navigation.navigate('Profile')
   };
+
+  useEffect(() => {
+    if(isTokenReady){
+      navigation.navigate('Profile', tokens)
+    };
+  }, [tokens])
+  
+  
 
   const handleLogin = () => {
     if (!userCredentials.username || !userCredentials.password) {
