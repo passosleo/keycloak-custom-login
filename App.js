@@ -7,46 +7,40 @@ import {
   Image,
   TextInput,
   ActivityIndicator,
+  View
 } from 'react-native';
 import logo from './src/assets/images/react-keycloak-logo.png';
-import qs from 'qs';
-import axios from 'axios';
+import {useAuth} from './src/hooks/auth.js';
 
 const App = () => {
-  const [tokens, setTokens] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [userCredentials, setUserCredentials] = useState({
     username: '',
     password: '',
   });
+  const {signIn, isTokenReady, tokens} = useAuth();
 
-  const login = async () => {
-    setLoading(true);
+  useEffect(() => {
+    console.log('Tokens:', tokens);
+  }, [tokens]);
 
-    const data = {
-      client_id: 'react-native-app',
-      grant_type: 'password',
-      ...userCredentials,
-    };
-
-    const config = {
-      method: 'post',
-      url: 'http://20.206.80.63:8585/realms/lighthouse/protocol/openid-connect/token',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      data: qs.stringify(data),
-    };
-
-    const response = await axios(config);
-    console.log('logado!');
-
-    setTokens({
-      accessToken: response.data.access_token,
-      refreshToken: response.data.refresh_token,
-    });
-
+  useEffect(() => {
     setLoading(false);
+  }, [isTokenReady]);
+
+  const handleLogin = () => {
+    if (!userCredentials.username || !userCredentials.password) {
+      setError(true);
+
+      setTimeout(() => {
+        setError(false);
+      }, 3000);
+      return;
+    }
+
+    signIn(userCredentials);
+    setLoading(true);
   };
 
   return (
@@ -79,12 +73,13 @@ const App = () => {
               })
             }
           />
-          <TouchableOpacity style={styles.button} onPress={() => login()}>
+          <TouchableOpacity style={styles.button} onPress={() => handleLogin()}>
             <Text style={styles.text}>Login</Text>
           </TouchableOpacity>
+          <View style={styles.error}>
+            {error && <Text>Credenciais inválidas!</Text>}
+          </View>
         </>
-      ) : tokens ? (
-        <Text>Hello World!</Text>
       ) : (
         <ActivityIndicator size="large" color="#00a5e5" />
       )}
@@ -128,6 +123,12 @@ const styles = StyleSheet.create({
   text: {
     color: '#fff',
     fontSize: 18,
+  },
+  error: {
+    height: 50,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 
