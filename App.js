@@ -10,15 +10,34 @@ import {
 import logo from './src/assets/images/react-keycloak-logo.png';
 
 const App = () => {
-  const [accessToken, setAccessToken] = useState("");
-  const [refreshToken, setRefresToken] = useState("");
+  const [tokens, setTokens] = useState({});
+  const [userCredentials, setUserCredentials] = useState({
+    user: '',
+    password: '',
+  });
 
   return (
     <SafeAreaView style={styles.container}>
       <Image style={styles.logo} source={logo} />
       <Text style={styles.title}>Keycloak React Native Custom Login</Text>
-      <TextInput style={styles.input} placeholder="User"/>
-      <TextInput style={styles.input} placeholder="Password"/>
+      <TextInput
+        style={styles.input}
+        placeholder="User"
+        value={userCredentials.user}
+        autocomplete="username"
+        onChange={e =>
+          setUserCredentials({...userCredentials, user: e.nativeEvent.text})
+        }
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={userCredentials.password}
+        autocomplete="password"
+        onChange={e =>
+          setUserCredentials({...userCredentials, password: e.nativeEvent.text})
+        }
+      />
       <TouchableOpacity style={styles.button}>
         <Text style={styles.text}>Login</Text>
       </TouchableOpacity>
@@ -51,6 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 6,
     marginBottom: 30,
+    paddingHorizontal: 14,
   },
   button: {
     backgroundColor: '#00a5e5',
