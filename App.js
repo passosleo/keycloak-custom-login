@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Image,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import logo from './src/assets/images/react-keycloak-logo.png';
 import qs from 'qs';
@@ -13,12 +14,15 @@ import axios from 'axios';
 
 const App = () => {
   const [tokens, setTokens] = useState({});
+  const [loading, setLoading] = useState(false);
   const [userCredentials, setUserCredentials] = useState({
-    username: 'leo',
-    password: '123',
+    username: '',
+    password: '',
   });
 
   const login = async () => {
+    setLoading(true);
+
     const data = {
       client_id: 'react-native-app',
       grant_type: 'password',
@@ -34,36 +38,56 @@ const App = () => {
       data: qs.stringify(data),
     };
 
-
     const response = await axios(config);
-    console.log("🚀 ~ file: App.js ~ line 37 ~ Login ~ response", response.data)
+    console.log('logado!');
+
+    setTokens({
+      accessToken: response.data.access_token,
+      refreshToken: response.data.refresh_token,
+    });
+
+    setLoading(false);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image style={styles.logo} source={logo} />
-      <Text style={styles.title}>Keycloak React Native Custom Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="User"
-        value={userCredentials.username}
-        autocomplete="username"
-        onChange={e =>
-          setUserCredentials({...userCredentials, username: e.nativeEvent.text})
-        }
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={userCredentials.password}
-        autocomplete="password"
-        onChange={e =>
-          setUserCredentials({...userCredentials, password: e.nativeEvent.text})
-        }
-      />
-      <TouchableOpacity style={styles.button} onPress={() => login()}>
-        <Text style={styles.text}>Login</Text>
-      </TouchableOpacity>
+      {!loading ? (
+        <>
+          <Image style={styles.logo} source={logo} />
+          <Text style={styles.title}>Keycloak React Native Custom Login</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="User"
+            value={userCredentials.username}
+            autocomplete="username"
+            onChange={e =>
+              setUserCredentials({
+                ...userCredentials,
+                username: e.nativeEvent.text,
+              })
+            }
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={userCredentials.password}
+            autocomplete="password"
+            onChange={e =>
+              setUserCredentials({
+                ...userCredentials,
+                password: e.nativeEvent.text,
+              })
+            }
+          />
+          <TouchableOpacity style={styles.button} onPress={() => login()}>
+            <Text style={styles.text}>Login</Text>
+          </TouchableOpacity>
+        </>
+      ) : tokens ? (
+        <Text>Hello World!</Text>
+      ) : (
+        <ActivityIndicator size="large" color="#00a5e5" />
+      )}
     </SafeAreaView>
   );
 };
