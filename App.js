@@ -8,13 +8,36 @@ import {
   TextInput,
 } from 'react-native';
 import logo from './src/assets/images/react-keycloak-logo.png';
+import qs from 'qs';
+import axios from 'axios';
 
 const App = () => {
   const [tokens, setTokens] = useState({});
   const [userCredentials, setUserCredentials] = useState({
-    user: '',
-    password: '',
+    username: 'leo',
+    password: '123',
   });
+
+  const login = async () => {
+    const data = {
+      client_id: 'react-native-app',
+      grant_type: 'password',
+      ...userCredentials,
+    };
+
+    const config = {
+      method: 'post',
+      url: 'http://20.206.80.63:8585/realms/lighthouse/protocol/openid-connect/token',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      data: qs.stringify(data),
+    };
+
+
+    const response = await axios(config);
+    console.log("🚀 ~ file: App.js ~ line 37 ~ Login ~ response", response.data)
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -23,10 +46,10 @@ const App = () => {
       <TextInput
         style={styles.input}
         placeholder="User"
-        value={userCredentials.user}
+        value={userCredentials.username}
         autocomplete="username"
         onChange={e =>
-          setUserCredentials({...userCredentials, user: e.nativeEvent.text})
+          setUserCredentials({...userCredentials, username: e.nativeEvent.text})
         }
       />
       <TextInput
@@ -38,7 +61,7 @@ const App = () => {
           setUserCredentials({...userCredentials, password: e.nativeEvent.text})
         }
       />
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={() => login()}>
         <Text style={styles.text}>Login</Text>
       </TouchableOpacity>
     </SafeAreaView>
